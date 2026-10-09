@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plan Drawer · ระบบวาดผังโครงการ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ================= RIBBON ================= -->
+  <header class="ribbon" id="ribbon">
+    <div class="rb-tabs" role="tablist">
+      <div class="brand"><span class="brand-logo" data-icon="layers"></span><span>Plan Drawer</span></div>
+      <button class="rb-tab active" data-tab="home" role="tab">หน้าแรก</button>
+      <button class="rb-tab" data-tab="plan" role="tab">แปลน</button>
+      <button class="rb-tab" data-tab="view" role="tab">มุมมอง</button>
+      <div class="rb-spacer"></div>
+      <div class="loc-chip" id="locChip" title="ตำแหน่งที่กำลังแก้ไข"></div>
+      <div class="save-state" id="saveState"><span class="dot"></span><span class="txt">บันทึกแล้ว</span></div>
+      <button class="icon-btn" data-cmd="help" data-icon="keyboard" data-tip="คีย์ลัดทั้งหมด|?|ดูรายการปุ่มลัดของคีย์บอร์ด"></button>
+      <button class="icon-btn" id="ribbonToggle" data-cmd="ribbon" data-icon="chevUp" data-tip="ย่อ/ขยาย Ribbon|Ctrl+F1|ซ่อนแถบเครื่องมือเพื่อเพิ่มพื้นที่วาด"></button>
+    </div>
+
+    <div class="rb-body">
+      <!-- -------- HOME -------- -->
+      <div class="rb-panel active" data-panel="home">
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big c-blue" data-cmd="upload" data-icon="upload" data-tip="อัปโหลดภาพผัง||เลือกไฟล์ภาพ (JPG, PNG, SVG) เป็นแปลนของชั้นนี้ หรือลากไฟล์มาวางบนพื้นที่วาดก็ได้"><span>อัปโหลด<br>ภาพผัง</span></button>
+            <div class="rb-col">
+              <button class="rb small c-teal" data-cmd="sample" data-icon="sample" data-tip="ใช้ภาพตัวอย่าง||โหลดผังตัวอย่างเพื่อทดลองใช้งาน"><span>ใช้ภาพตัวอย่าง</span></button>
+              <button class="rb small c-slate" data-cmd="import" data-icon="file" data-tip="เปิดโปรเจกต์||นำเข้าไฟล์ .json ที่เคยส่งออกไว้"><span>เปิดโปรเจกต์</span></button>
+              <button class="rb small c-slate" data-cmd="export" data-icon="save" data-tip="ส่งออกโปรเจกต์|Ctrl+S|บันทึกทุก Unit/ชั้น พร้อมภาพและประวัติเป็นไฟล์ .json"><span>ส่งออกโปรเจกต์</span></button>
+            </div>
+          </div>
+          <div class="rb-caption">ไฟล์</div>
+        </div>
+
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big tool c-blue" data-cmd="tool:select" data-icon="cursor" data-tip="เลือก / แก้ไข|V|คลิกเพื่อเลือก ลากเพื่อย้าย ลากจุดสีขาวเพื่อแก้รูปร่าง Shift+คลิกเพื่อเลือกหลายรายการ"><span>เลือก /<br>แก้ไข</span></button>
+            <button class="rb big tool c-slate" data-cmd="tool:pan" data-icon="hand" data-tip="เลื่อนแผนที่|H|ลากเพื่อเลื่อน (กด Space ค้างไว้เพื่อเลื่อนชั่วคราวจากเครื่องมือใดก็ได้)"><span>เลื่อน<br>แผนที่</span></button>
+            <button class="rb big tool c-green" data-cmd="tool:rect" data-icon="square" data-tip="วาดสี่เหลี่ยม|R|ลากเพื่อวาดแปลงสี่เหลี่ยม กด Shift ค้างเพื่อให้เป็นจัตุรัส (หมุนแปลนให้ตรงก่อนจะวาดง่ายขึ้น)"><span>สี่เหลี่ยม</span></button>
+            <button class="rb big tool c-green" data-cmd="tool:polygon" data-icon="polygon" data-tip="วาด Polygon|P|คลิกวางจุดทีละจุด คลิกจุดแรกหรือดับเบิลคลิกเพื่อจบ Backspace ลบจุดล่าสุด"><span>Polygon</span></button>
+            <div class="split" id="markerSplit">
+              <button class="rb big tool c-orange split-main" data-cmd="tool:marker" data-tip="ปักไอคอน|I|คลิกบนแปลนเพื่อปักหมุดสัญลักษณ์ เช่น ป้อมยาม สวน ที่จอดรถ"><span class="split-icon" id="markerIcon"></span><span>ปักไอคอน</span></button>
+              <button class="split-arrow" data-cmd="markerMenu" data-tip="เลือกชนิดไอคอน||เลือกสัญลักษณ์ที่จะปัก" aria-label="เลือกชนิดไอคอน"><span data-icon="chevDown"></span></button>
+              <div class="menu icon-gallery" id="markerMenu" hidden></div>
+            </div>
+          </div>
+          <div class="rb-caption">เครื่องมือวาด</div>
+        </div>
+
+        <div class="rb-group">
+          <div class="rb-items">
+            <div class="rb-col">
+              <button class="rb small c-slate" data-cmd="undo" data-icon="undo" data-tip="เลิกทำ|Ctrl+Z|ย้อนการกระทำล่าสุด"><span>เลิกทำ</span></button>
+              <button class="rb small c-slate" data-cmd="redo" data-icon="redo" data-tip="ทำซ้ำ|Ctrl+Y|ทำการกระทำที่เลิกไปกลับมาใหม่"><span>ทำซ้ำ</span></button>
+              <button class="rb small c-slate" data-cmd="duplicate" data-icon="copy" data-tip="ทำสำเนา|Ctrl+D|คัดลอกรายการที่เลือก"><span>ทำสำเนา</span></button>
+            </div>
+            <button class="rb big c-red" data-cmd="delete" data-icon="trash" data-tip="ลบที่เลือก|Delete|ลบแปลงหรือไอคอนที่เลือกอยู่ (เลิกทำได้ด้วย Ctrl+Z)"><span>ลบ<br>ที่เลือก</span></button>
+          </div>
+          <div class="rb-caption">แก้ไข</div>
+        </div>
+
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big c-purple" data-cmd="rotate:-90" data-icon="rotl" data-tip="หมุนซ้าย 90°|[|หมุนแปลนทวนเข็มนาฬิกา รูปที่วาดไว้จะหมุนตามไปด้วย"><span>หมุนซ้าย</span></button>
+            <button class="rb big c-purple" data-cmd="rotate:90" data-icon="rotr" data-tip="หมุนขวา 90°|]|หมุนแปลนตามเข็มนาฬิกา รูปที่วาดไว้จะหมุนตามไปด้วย"><span>หมุนขวา</span></button>
+            <div class="rb-col">
+              <label class="rb-field" data-tip="หมุนละเอียด||ลากเพื่อหมุนแปลนทีละองศา เหมาะสำหรับจัดผังที่เอียงให้ตรง">
+                <span>องศา</span><input type="number" id="rotNum" min="-180" max="180" step="1" value="0">
+              </label>
+              <button class="rb small c-purple" data-cmd="rotate:reset" data-icon="reset" data-tip="รีเซ็ตการหมุน||กลับมุมแปลนเป็น 0°"><span>รีเซ็ต 0°</span></button>
+            </div>
+          </div>
+          <div class="rb-caption">หมุนแปลน</div>
+        </div>
+
+        <div class="rb-group">
+          <div class="rb-items status-gallery" id="statusGallery"></div>
+          <div class="rb-caption">สถานะแปลง</div>
+        </div>
+      </div>
+
+      <!-- -------- PLAN -------- -->
+      <div class="rb-panel" data-panel="plan">
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big c-blue" data-cmd="upload" data-icon="image" data-tip="เปลี่ยนภาพผัง||แทนที่ภาพแปลนของชั้นนี้ รูปที่วาดไว้จะยังอยู่"><span>เปลี่ยน<br>ภาพผัง</span></button>
+            <div class="rb-col">
+              <button class="rb small c-red" data-cmd="image:remove" data-icon="x" data-tip="นำภาพผังออก||เอาภาพพื้นหลังออก (รูปที่วาดไว้ยังอยู่)"><span>นำภาพออก</span></button>
+              <button class="rb small c-slate toggle" data-cmd="toggle:showImage" data-icon="eye" data-tip="แสดงภาพผัง||ซ่อน/แสดงภาพพื้นหลังชั่วคราว"><span>แสดงภาพผัง</span></button>
+            </div>
+          </div>
+          <div class="rb-caption">ภาพผัง</div>
+        </div>
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big c-purple" data-cmd="rotate:-90" data-icon="rotl" data-tip="หมุนซ้าย 90°|[|"><span>หมุนซ้าย</span></button>
+            <button class="rb big c-purple" data-cmd="rotate:90" data-icon="rotr" data-tip="หมุนขวา 90°|]|"><span>หมุนขวา</span></button>
+            <div class="rb-col wide">
+              <label class="rb-slider" data-tip="หมุนละเอียด||ลากเพื่อหมุนแปลนทีละองศา">
+                <span>หมุน</span><input type="range" id="rotRange" min="-180" max="180" step="0.5" value="0"><output id="rotOut">0°</output>
+              </label>
+              <button class="rb small c-purple" data-cmd="rotate:reset" data-icon="reset"><span>รีเซ็ต 0°</span></button>
+            </div>
+          </div>
+          <div class="rb-caption">การหมุน</div>
+        </div>
+        <div class="rb-group">
+          <div class="rb-items">
+            <div class="rb-col wide">
+              <label class="rb-slider" data-tip="ความชัดภาพผัง||ลดความชัดของภาพพื้นหลังเพื่อให้เห็นรูปที่วาดชัดขึ้น">
+                <span data-icon="opacity"></span><input type="range" id="imgOpacity" min="0.1" max="1" step="0.05"><output id="imgOpacityOut"></output>
+              </label>
+              <label class="rb-field" data-tip="มาตราส่วน||ระบุว่า 1 เมตร เท่ากับกี่พิกเซลบนภาพ เพื่อคำนวณพื้นที่เป็น ตร.ม. และ ตร.วา">
+                <span data-icon="ruler"></span><span>1 ม. =</span><input type="number" id="ppm" min="0" step="0.1" placeholder="—"><span>px</span>
+              </label>
+            </div>
+          </div>
+          <div class="rb-caption">ภาพและมาตราส่วน</div>
+        </div>
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big c-slate" data-cmd="fit" data-icon="fit" data-tip="พอดีหน้าจอ|0|ซูมให้เห็นแปลนทั้งหมด"><span>พอดีจอ</span></button>
+            <div class="rb-col">
+              <button class="rb small c-slate" data-cmd="zoom:in" data-icon="plus" data-tip="ซูมเข้า|+|"><span>ซูมเข้า</span></button>
+              <button class="rb small c-slate" data-cmd="zoom:out" data-icon="minus" data-tip="ซูมออก|-|"><span>ซูมออก</span></button>
+              <button class="rb small c-slate" data-cmd="zoom:100" data-icon="zoom100" data-tip="ขนาดจริง 100%|1:1|"><span>100%</span></button>
+            </div>
+          </div>
+          <div class="rb-caption">การซูม</div>
+        </div>
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big c-teal" data-cmd="png" data-icon="png" data-tip="บันทึกเป็นภาพ PNG||ส่งออกแปลนพร้อมรูปที่วาดของชั้นนี้เป็นไฟล์ภาพ"><span>บันทึก<br>เป็น PNG</span></button>
+          </div>
+          <div class="rb-caption">ส่งออก</div>
+        </div>
+      </div>
+
+      <!-- -------- VIEW -------- -->
+      <div class="rb-panel" data-panel="view">
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big toggle c-blue" data-cmd="toggle:labels" data-icon="tag" data-tip="ชื่อแปลง||แสดง/ซ่อนชื่อบนพื้นที่ที่วาด"><span>ชื่อแปลง</span></button>
+            <button class="rb big toggle c-orange" data-cmd="toggle:markers" data-icon="pin" data-tip="ไอคอน||แสดง/ซ่อนไอคอนที่ปักไว้"><span>ไอคอน</span></button>
+            <div class="rb-col wide">
+              <label class="rb-slider" data-tip="ความเข้มสีพื้นที่||ปรับความทึบของสีสถานะในแปลง">
+                <span>สีพื้นที่</span><input type="range" id="fillOpacity" min="0" max="0.9" step="0.05"><output id="fillOpacityOut"></output>
+              </label>
+            </div>
+          </div>
+          <div class="rb-caption">แสดงบนแปลน</div>
+        </div>
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big toggle c-slate" data-cmd="toggle:panel" data-icon="panel" data-tip="แผงคุณสมบัติ||แสดง/ซ่อนแผงด้านขวา"><span>แผงด้านขวา</span></button>
+            <button class="rb big toggle c-slate" data-cmd="toggle:timeline" data-icon="timeline" data-tip="แถบประวัติ||แสดง/ซ่อน Historical timeline ด้านล่าง"><span>แถบประวัติ</span></button>
+          </div>
+          <div class="rb-caption">หน้าต่าง</div>
+        </div>
+        <div class="rb-group">
+          <div class="rb-items">
+            <button class="rb big c-slate" data-cmd="help" data-icon="keyboard" data-tip="คีย์ลัด|?|"><span>คีย์ลัด</span></button>
+            <button class="rb big c-red" data-cmd="resetAll" data-icon="trash" data-tip="ล้างข้อมูลทั้งหมด||ลบทุก Unit/ชั้น และประวัติที่บันทึกไว้ในเบราว์เซอร์นี้"><span>ล้างข้อมูล<br>ทั้งหมด</span></button>
+          </div>
+          <div class="rb-caption">อื่น ๆ</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+    <section class="stage-wrap" id="stageWrap">
+      <svg id="stage" class="stage" xmlns="http://www.w3.org/2000/svg">
+        <g id="world">
+          <image id="planImg" preserveAspectRatio="none"/>
+          <rect id="planFrame" fill="none"/>
+          <g id="ghostLayer"></g>
+          <g id="shapeLayer"></g>
+          <g id="selLayer"></g>
+        </g>
+        <g id="overlay"></g>
+      </svg>
+
+      <div class="hint" id="hint"></div>
+
+      <div class="preview-banner" id="previewBanner" hidden>
+        <span data-icon="history"></span>
+        <div class="pb-text"><b>กำลังดูย้อนหลัง</b><span id="pbWhen"></span></div>
+        <button class="btn" data-cmd="tl:restore"><span data-icon="reset"></span>คืนค่าเป็นเวอร์ชันนี้</button>
+        <button class="btn primary" data-cmd="tl:exit"><span data-icon="x"></span>กลับสู่ปัจจุบัน</button>
+      </div>
+
+      <div class="empty" id="empty" hidden>
+        <div class="empty-card">
+          <div class="empty-ic" data-icon="image"></div>
+          <h2>ยังไม่มีภาพผังสำหรับ <span id="emptyLoc"></span></h2>
+          <p>ลากไฟล์ภาพมาวางตรงนี้ หรือเลือกจากปุ่มด้านล่าง<br>รองรับ JPG, PNG, SVG</p>
+          <div class="empty-actions">
+            <button class="btn primary lg" data-cmd="upload"><span data-icon="upload"></span>อัปโหลดภาพผัง</button>
+            <button class="btn lg" data-cmd="sample"><span data-icon="sample"></span>ใช้ภาพตัวอย่าง</button>
+          </div>
+          <button class="link" data-cmd="dismissEmpty">วาดบนพื้นเปล่าโดยไม่ใช้ภาพ</button>
+        </div>
+      </div>
+
+      <div class="dropzone" id="dropzone" hidden><div><span data-icon="upload"></span>วางไฟล์ภาพเพื่อใช้เป็นแปลนของชั้นนี้</div></div>
+
+      <!-- floating: map controls + unit/floor picker (bottom-right) -->
+      <div class="map-ctrls">
+        <button class="compass" id="compass" data-cmd="rotate:reset" data-tip="ทิศของแปลน||คลิกเพื่อหมุนกลับเป็น 0°"><span id="compassNeedle" data-icon="compass"></span></button>
+        <div class="zoom-stack">
+          <button data-cmd="zoom:in" data-icon="plus" data-tip="ซูมเข้า|+|"></button>
+          <button data-cmd="zoom:out" data-icon="minus" data-tip="ซูมออก|-|"></button>
+          <button data-cmd="fit" data-icon="fit" data-tip="พอดีหน้าจอ|0|"></button>
+        </div>
+        <div class="level-picker" id="levelPicker">
+          <div class="unit-wrap">
+            <button class="unit-btn" id="unitBtn" data-cmd="unitMenu" data-tip="เลือก Unit||สลับโซน / อาคารที่ต้องการดู"><span data-icon="building"></span><span id="unitName"></span><span data-icon="chevUp" class="caret"></span></button>
+            <div class="menu unit-menu" id="unitMenu" hidden></div>
+          </div>
+          <div class="floors" id="floors"></div>
+        </div>
+      </div>
+
+      <div class="statusbar" id="statusbar">
+        <span id="sbTool"></span><span class="sep"></span><span id="sbPos">—</span><span class="sep"></span><span id="sbZoom"></span>
+      </div>
+    </section>
+
+    <aside class="side" id="side">
+      <div class="side-tabs">
+        <button class="side-tab active" data-ptab="props">คุณสมบัติ</button>
+        <button class="side-tab" data-ptab="list">รายการ <span class="count" id="listCount">0</span></button>
+      </div>
+      <div class="side-body" id="panelProps"></div>
+      <div class="side-body" id="panelList" hidden>
+        <div class="search"><input id="listSearch" type="search" placeholder="ค้นหาชื่อแปลง / ไอคอน..."></div>
+        <div class="list-filter" id="listFilter"></div>
+        <div id="listItems" class="list-items"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ================= HISTORICAL TIMELINE ================= -->
+  <footer class="timeline" id="timeline">
+    <div class="tl-head">
+      <span class="tl-title"><span data-icon="history"></span>ประวัติการเปลี่ยนแปลง</span>
+      <span class="tl-sub" id="tlSub"></span>
+      <div class="rb-spacer"></div>
+      <label class="switch" data-tip="เทียบกับปัจจุบัน||ขณะดูย้อนหลัง แสดงเส้นประของรูปในเวอร์ชันปัจจุบันซ้อนไว้ เพื่อเห็นความเปลี่ยนแปลง"><input type="checkbox" id="tlCompare"><span class="sw"></span>เทียบกับปัจจุบัน</label>
+      <button class="icon-btn" data-cmd="toggle:timeline" data-icon="chevDown" data-tip="ซ่อนแถบประวัติ||"></button>
+    </div>
+    <div class="tl-body">
+      <div class="tl-ctrl">
+        <button class="icon-btn" data-cmd="tl:first" data-icon="first" data-tip="จุดเริ่มต้น|Home|"></button>
+        <button class="icon-btn" data-cmd="tl:prev" data-icon="prev" data-tip="ย้อนกลับ 1 ขั้น|Alt+←|"></button>
+        <button class="icon-btn play" id="tlPlay" data-cmd="tl:play" data-icon="play" data-tip="เล่นย้อนหลัง||ดูการเปลี่ยนแปลงตั้งแต่ต้นจนถึงปัจจุบันแบบอัตโนมัติ"></button>
+        <button class="icon-btn" data-cmd="tl:next" data-icon="next" data-tip="ไปข้างหน้า 1 ขั้น|Alt+→|"></button>
+        <button class="icon-btn" data-cmd="tl:exit" data-icon="last" data-tip="ปัจจุบัน|End|"></button>
+      </div>
+      <div class="tl-track" id="tlTrack"><div class="tl-inner" id="tlInner"></div></div>
+      <div class="tl-info" id="tlInfo"></div>
+    </div>
+  </footer>
+</div>
+
+<div class="tooltip" id="tooltip" hidden></div>
+<div class="toasts" id="toasts"></div>
+<input type="file" id="fileImage" accept="image/*" hidden>
+<input type="file" id="fileProject" accept=".json,application/json" hidden>
+
+<dialog id="helpDlg" class="dlg">
+  <div class="dlg-head"><h3>คีย์ลัด</h3><button class="icon-btn" data-close data-icon="x"></button></div>
+  <div class="keys">
+    <div><kbd>V</kbd> เลือก / แก้ไข</div><div><kbd>H</kbd> เลื่อนแผนที่</div>
+    <div><kbd>R</kbd> วาดสี่เหลี่ยม</div><div><kbd>P</kbd> วาด Polygon</div>
+    <div><kbd>I</kbd> ปักไอคอน</div><div><kbd>Space</kbd> ค้างไว้เพื่อเลื่อน</div>
+    <div><kbd>Enter</kbd> จบ Polygon</div><div><kbd>Backspace</kbd> ลบจุดล่าสุดขณะวาด</div>
+    <div><kbd>Esc</kbd> ยกเลิก / ยกเลิกการเลือก</div><div><kbd>Delete</kbd> ลบที่เลือก</div>
+    <div><kbd>Ctrl</kbd>+<kbd>Z</kbd> เลิกทำ</div><div><kbd>Ctrl</kbd>+<kbd>Y</kbd> ทำซ้ำ</div>
+    <div><kbd>Ctrl</kbd>+<kbd>D</kbd> ทำสำเนา</div><div><kbd>Ctrl</kbd>+<kbd>A</kbd> เลือกทั้งหมด</div>
+    <div><kbd>←↑→↓</kbd> ขยับทีละนิด (+Shift = 10)</div><div><kbd>[</kbd> <kbd>]</kbd> หมุนแปลน 90°</div>
+    <div><kbd>+</kbd> <kbd>-</kbd> ซูม · <kbd>0</kbd> พอดีจอ</div><div><kbd>1</kbd>–<kbd>4</kbd> เปลี่ยนชั้น</div>
+    <div><kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> เลื่อนประวัติ</div><div><kbd>ดับเบิลคลิก</kbd> จุดยอด = ลบจุด</div>
+  </div>
+</dialog>
+
+<script src="js/icons.js"></script>
+<script src="js/sample.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
